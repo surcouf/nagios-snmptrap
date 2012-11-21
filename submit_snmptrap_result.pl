@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 #
 # SUBMIT_TRAP_RESULT
-# Written by Raphaël Bordet <raphael.bordet@linagora.com>
+# Written by Raphaël 'SurcouF' Bordet <surcouf@debianfr.net>
 # Last Modified: 28/04/2010
 #
 # This plugin will write a command to the Nagios command
@@ -36,8 +36,7 @@ my $nagios_plugin = Nagios::Plugin->new(
 		version		=> '0.01',
 		blurb		=> 'This command sent external commands to Nagios from SNMP traps translated by SNMPtt.',
 		plugin		=> 'submit_snmptrap_results',
-		extra		=> "\n Copyright (c) 2010 Raphael Bordet <raphael.bordet\@linagora.com>\n"
-					." Copyright (c) 2010 LINAGORA SA\n Bugs to http://www.linagora.com",
+		extra		=> "\n Copyright (c) 2010 Raphael 'SurcouF' Bordet <surcouf\@debianfr.net>",
 	);
 
 #
