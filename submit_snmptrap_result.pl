@@ -21,8 +21,6 @@
  
 use strict;
 
-use Data::Dumper;
-
 use Nagios::Plugin;	# Import Nagios exit codes as constants
 use Nagios::Cmd;
 
@@ -94,14 +92,9 @@ $nagios_plugin->add_arg(
 
 $nagios_plugin->getopts;
 
-#my $nagios_config = Nagios::Config->new( 
-#			Filename	=> $nagios_plugin->opts->configfile, 
-#			Version 	=> $nagios_plugin->opts->nagiosversion,
-#		 );
 # create the command line to add to the command file
 my $nagios_command = Nagios::Cmd->new( 
 		'/var/lib/nagios3/rw/nagios.cmd',
-#		$nagios_config->get('command_file'),
 	);
 
 # get the current date/time in seconds since UNIX epoch
@@ -121,12 +114,6 @@ if ( $nagios_plugin->opts->returncode =~ /NORMAL|INFORM|INFORMATIONAL|OK/ ) {
 	$returncode = CRITICAL;
 }
 
-
-print STDERR "[$current_time] PROCESS_SERVICE_CHECK_RESULT;"
-				. $hostname .";"
-				. $nagios_plugin->opts->servicedesc .";"
-				. "$returncode;"
-				. $nagios_plugin->opts->output ."\n";
 
 # append the command to the end of the command file
 $nagios_command->nagios_cmd( "[$current_time] PROCESS_SERVICE_CHECK_RESULT;"
