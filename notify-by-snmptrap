@@ -1,0 +1,76 @@
+#!/bin/sh
+# 'notify-by-snmptrap' command definition
+
+snmptrap="/usr/bin/snmptrap -v 2c -c public"
+trapoid="nSvcNotify" 
+
+# get the current date/time in seconds since UNIX epoch
+datetime=$(date +%s)
+
+traphost=$1
+
+hostname=$2
+case "$3" in
+	UP)
+		hoststate=0
+		;;
+	DOWN)
+		hoststate=1
+		;;
+	UNREACHABLE)
+		hoststate=3
+		;;
+esac
+
+servicedesc="$4"
+output="$5"
+
+case "$6" in
+	OK)
+		servicestate=0
+		;;
+	WARNING)
+		servicestate=1
+		;;
+	CRITICAL)
+		servicestate=2
+		;;
+	UNKNOWN)
+		servicestate=3
+		;;
+esac
+
+case "$7" in
+	PROBLEM)
+		notificationtype=0
+		;;
+	RECOVERY)
+		notificationtype=1
+		;;
+	ACKNOWLEDGEMENT)
+		notificationtype=2
+		;;
+	FLAPPINGSTART)
+		notificationtype=3
+		;;
+	FLAPPINGSTOP)
+		notificationtype=4
+		;;
+esac
+
+notificationnumber=$8
+
+laststatechange=$9
+
+$snmptrap $traphost "$datetime" $trapoid 	\
+	nSvcNotifyType	i $notificationtype	\
+	nSvcNotifyNum	i $notificationnumber	\
+	nHostname	s $hostname		\
+	nHostStateID	i 0			\
+	nSvcDesc 	s "$servicedesc"	\
+	nSvcStateID	i $servicestate		\
+	nSvcAttempt	i 3			\
+	nSvcDurationSec	i $laststatechange	\
+	nSvcOutput	s "$output"
+	
+
