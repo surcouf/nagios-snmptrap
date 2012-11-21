@@ -1,0 +1,95 @@
+#!/bin/sh
+
+# OBSESSIVE_SVC_HANDLER
+# Written by Ethan Galstad (nagios@nagils.org)
+# Last Modified: 07-19-2001
+#
+# This script is intended to run as the OCSP command
+# on a distributed monitoring server.  The script calls
+# submit_check_result_via_nsca to send the service check
+# results to the central monitoring server.
+#
+# command_line	$USER2$/distributed-monitoring/obsessive_svc_snmptrap destination $HOSTNAME$ $HOSTSTATE$ '$SERVICEDESC$' $SERVICESTATE$ '$OUTPUT$' '$PERFDATA$' $LASTSTATECHANGE$ $SERVICEATTEMPT$ $TIMET$
+# Arguments:
+#  $1 = host_name (Short name of host that the service is
+#       associated with)
+#  $2 = hoststate_string
+#  $3 = svc_description (Description of the service)
+#  $4 = state_string (A string representing the status of
+#       the given service - "OK", "WARNING", "CRITICAL"
+#       or "UNKNOWN")
+#  $5 = plugin_output (A text string that should be used
+#       as the plugin output for the service checks)
+#  $6 = plugin_perfdata
+#  $7 = lastchange
+#  $8 = svc_attempt
+#  $9 = uptime
+#
+
+notifyHost="${1}"
+
+trapOID="nSvcEvent"
+
+# Location of the submit_check_result_via_nsca script
+SubmitCmd="/usr/bin/snmptrap -v 2c -c public"
+
+hostName=${2}
+
+## nHostStateID:
+# 0 - up
+# 1 - down
+# 3 - unreachable
+case "${3}" in
+	UP)
+		nHostStateID=0
+		;;
+	DOWN)
+		nHostStateID=1
+		;;
+	UNREACHABLE)
+		nHostStateID=3
+		;;
+esac
+
+serviceDesc=${4}
+
+## nSvcStateID: 
+# 0 - ok
+# 1 - warning
+# 2 - critical
+# 3 - unknown
+case "${5}" in
+	OK)
+		nSvcStateID=0
+		;;
+	WARNING)
+		nSvcStateID=1
+		;;
+	CRITICAL)
+		nSvcStateID=2
+		;;
+	UNKNOWN)
+		nSvcStateID=3
+		;;
+esac
+
+output=${6}
+lastchange=${7}
+attempt=${8}
+upTime=${9}
+perfdata=${10}
+
+varbinds="nsHostname s \"$hostName\" "
+
+# Send the service check results to the central monitoring server
+$SubmitCmd 	$notifyHost	"$upTime" $trapOID	\
+			nHostname	s "$hostName"	\
+			nHostStateID	i $nHostStateID	\
+			nSvcDesc	s "$serviceDesc"\
+			nSvcStateID	i $nSvcStateID	\
+			nSvcLastChange	i $lastchange	\
+			nSvcAttempt	i $attempt	\
+			nSvcDurationSec	i 1272003119	\
+			nSvcOutput	s "$output"	\
+			nSvcPerfData	s "$perfdata"
+
